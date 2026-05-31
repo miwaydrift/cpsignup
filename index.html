@@ -794,6 +794,22 @@ tr.r.taken-row:hover { opacity: 0.65; }
 .google-btn svg { flex-shrink: 0; }
 .auth-error { color: var(--red); font-size: 12px; margin-top: 12px; display: none; }
 .auth-loading { font-size: 13px; color: var(--text3); margin-top: 12px; display: none; }
+.auth-divider {
+  display: flex; align-items: center; gap: 10px;
+  margin: 16px 0; font-size: 12px; color: var(--text3);
+}
+.auth-divider::before, .auth-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+.guest-btn {
+  width: 100%; padding: 11px 20px;
+  background: none; border: 1.5px solid var(--border);
+  border-radius: var(--radius); cursor: pointer;
+  font-size: 13px; font-weight: 600; color: var(--text2);
+  font-family: var(--font); transition: all 0.15s;
+}
+.guest-btn:hover { border-color: var(--border2); color: var(--text); background: var(--surface2); }
+.auth-note { font-size: 11px; color: var(--text3); margin-top: 14px; line-height: 1.5; }
 
 /* ───── USER PILL IN HEADER ───── */
 .user-pill {
@@ -846,6 +862,9 @@ tr.r.taken-row:hover { opacity: 0.65; }
       <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.34-8.16 2.34-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
       Continue with Google
     </button>
+    <div class="auth-divider">or</div>
+    <button class="guest-btn" onclick="continueAsGuest()">👤 Continue as Guest</button>
+    <div class="auth-note">Guest mode: favourites &amp; bid rank are saved on this device only and won't sync across devices.</div>
     <div class="auth-loading" id="auth-loading">Signing in…</div>
     <div class="auth-error" id="auth-error"></div>
   </div>
@@ -1079,7 +1098,14 @@ var DATA=[],SHOW=500, FAVS={}, RANKS=[], CURTAB='all', SC='c', SD=1, SEL=null;
 // ─────── Firebase save/load helpers ───────
 var _saveTimer = null;
 function scheduleSave() {
-  if (!CURRENT_USER || !FIREBASE_READY) return;
+  if (!CURRENT_USER) return;
+  if (CURRENT_USER === 'guest') {
+    // Guest: save to localStorage immediately
+    try { localStorage.setItem('cp_favs_guest', JSON.stringify(FAVS)); } catch(e){}
+    try { localStorage.setItem('cp_ranks_guest', JSON.stringify(RANKS)); } catch(e){}
+    return;
+  }
+  if (!FIREBASE_READY) return;
   setSyncDot('saving');
   if (_saveTimer) clearTimeout(_saveTimer);
   _saveTimer = setTimeout(doSave, 1200);
@@ -1148,8 +1174,41 @@ function signInWithGoogle() {
     errEl.textContent    = err.message;
   });
 }
+
+function continueAsGuest() {
+  // Load any previously saved guest data from localStorage
+  try { var sf = localStorage.getItem('cp_favs_guest'); if(sf) FAVS = JSON.parse(sf); } catch(e){}
+  try { var sr = localStorage.getItem('cp_ranks_guest'); if(sr) RANKS = JSON.parse(sr); } catch(e){}
+  // Hide overlay
+  var overlay = document.getElementById('auth-overlay');
+  overlay.classList.add('hidden');
+  setTimeout(function(){ overlay.style.display='none'; }, 300);
+  // Show guest pill
+  var pill = document.getElementById('user-pill');
+  pill.style.display = 'flex';
+  document.getElementById('user-avatar-placeholder').textContent = '👤';
+  document.getElementById('user-avatar-placeholder').style.background = 'var(--text3)';
+  document.getElementById('user-name-short').textContent = 'Guest';
+  document.getElementById('sync-dot').style.display = 'none';
+  // Mark as guest
+  CURRENT_USER = 'guest';
+  render(); updFavCnt();
+}
+
 function signOut() {
-  if (confirm('Sign out?')) fbAuth.signOut();
+  if (CURRENT_USER === 'guest') {
+    if (confirm('Leave guest mode? Your local favourites will be kept on this device.')) {
+      CURRENT_USER = null;
+      FAVS = {}; RANKS = [];
+      var overlay = document.getElementById('auth-overlay');
+      overlay.style.display = 'flex';
+      overlay.classList.remove('hidden');
+      document.getElementById('user-pill').style.display = 'none';
+      render(); updFavCnt();
+    }
+  } else {
+    if (confirm('Sign out?')) fbAuth.signOut();
+  }
 }
 
 // Auth state watcher
