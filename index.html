@@ -1989,7 +1989,6 @@ function parseHastusData(raw){
   var relief=[];
 
   if(Array.isArray(data)){
-    // Reject if it looks like the main raw schedule data (array of arrays)
     if(data.length>0 && Array.isArray(data[0])) return null;
     for(var i=0;i<data.length;i++){
       var item=data[i];
@@ -1998,7 +1997,6 @@ function parseHastusData(raw){
       } else if(typeof item==='object'&&item!==null){
         var roster=(item.roster||'').toUpperCase();
         var dutyType=(item.duty_type||item.type||item.position_type||'').toUpperCase();
-        // Separate sick/vac relief by roster OR duty_type
         var isSickRel=roster==='SICKRL'||dutyType==='SICK RELIEF'||dutyType==='SICKRL'||dutyType==='SICK_RELIEF';
         var isVacRel=roster==='VACREL'||dutyType==='VAC RELIEF'||dutyType==='VACREL'||dutyType==='VAC_RELIEF'||dutyType==='VACATION RELIEF';
         if(isSickRel||isVacRel){
@@ -2013,7 +2011,7 @@ function parseHastusData(raw){
             else workDays.push(dayKey);
           }
           relief.push({
-            position: item.position||'',
+            position: String(item.position||''),
             type: rtype,
             roster: item.roster||'',
             working: item.working||'',
@@ -2026,10 +2024,9 @@ function parseHastusData(raw){
           });
           continue;
         }
-        // Regular positions — skip if no recognisable ID field
+        // Regular positions — only include eligible ones
         if(item.eligible && item.eligible!=='Eligible') continue;
         var val=item.position_id||item.position||item.crew_id||item.id||item.crew_number;
-        // Don't use item.crew as fallback — main-data rows have crew field but are not HASTUS availability
         if(val) ids.push(String(val).trim());
       }
     }
@@ -2039,7 +2036,6 @@ function parseHastusData(raw){
   }
   return (ids.length>0||relief.length>0)?{ids:ids, relief:relief}:null;
 }
-
 
 function applyHastus(){
   var raw=document.getElementById('hm-paste').value.trim();
