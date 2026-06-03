@@ -850,40 +850,33 @@ tr.r.taken-row:hover { opacity: 0.65; }
 }
 .hastus-cloud-row.saved { background: var(--green-bg); border-color: var(--green); color: var(--green); }
 
-/* ───── FLOATING DOCK (Like + Feedback) ───── */
-#float-dock {
-  position: fixed; right: 16px; bottom: 16px;
-  z-index: 150;
-  display: flex; flex-direction: column; gap: 10px;
-  align-items: flex-end;
+/* ───── LIKE BUTTON ───── */
+.like-btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #fff; border-radius: var(--radius-sm);
+  padding: 8px 12px; cursor: pointer; font-size: 14px;
+  font-family: var(--font); font-weight: 600;
+  display: flex; align-items: center; gap: 6px;
+  transition: all 0.15s;
 }
-.float-btn {
-  display: flex; align-items: center; gap: 7px;
-  border: none; cursor: pointer;
-  font-family: var(--font); font-weight: 700; font-size: 14px;
-  border-radius: 28px; padding: 12px 16px;
-  box-shadow: var(--shadow-lg);
-  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
-  -webkit-tap-highlight-color: transparent;
+.like-btn:hover { background: rgba(255,255,255,0.15); }
+.like-btn.liked { background: #be123c; border-color: #be123c; }
+.like-btn .heart { font-size: 15px; line-height: 1; transition: transform 0.2s; }
+.like-btn.pop .heart { transform: scale(1.5); }
+.like-btn .like-count { font-variant-numeric: tabular-nums; min-width: 12px; }
+
+/* ───── FEEDBACK ───── */
+.fb-btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #d1d5db; border-radius: var(--radius-sm);
+  padding: 8px 12px; cursor: pointer; font-size: 14px;
+  font-family: var(--font); font-weight: 600;
+  display: flex; align-items: center; gap: 5px;
+  transition: all 0.15s;
 }
-.float-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,0,0,0.2); }
-.float-btn:active { transform: scale(0.96); }
-.float-btn .float-label { white-space: nowrap; }
-
-.float-btn.fb { background: var(--surface); color: var(--text); border: 1.5px solid var(--border2); }
-.float-btn.fb:hover { background: var(--surface2); }
-
-.float-btn.like { background: #fff; color: var(--text); border: 1.5px solid var(--border2); }
-.float-btn.like.liked { background: #be123c; color: #fff; border-color: #be123c; }
-.float-btn.like .heart { font-size: 17px; line-height: 1; transition: transform 0.2s; }
-.float-btn.like.pop .heart { transform: scale(1.6); }
-.float-btn.like .like-count { font-variant-numeric: tabular-nums; min-width: 12px; font-weight: 700; }
-
-/* On small screens, collapse feedback labels to keep it tidy */
-@media (max-width: 480px) {
-  #float-dock { right: 12px; bottom: 12px; gap: 8px; }
-  .float-btn { padding: 11px 14px; font-size: 13px; }
-}
+.fb-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
 
 #fb-overlay, #fbadmin-overlay {
   display: none; position: fixed; inset: 0;
@@ -954,14 +947,6 @@ tr.r.taken-row:hover { opacity: 0.65; }
   </div>
 </div>
 
-<div id="float-dock">
-  <button class="float-btn fb" id="fbadmin-btn" onclick="openFeedbackAdmin()" title="View feedback" style="display:none">&#x1F4EC;<span class="float-label">Inbox</span></button>
-  <button class="float-btn fb" id="fb-btn" onclick="openFeedback()" title="Send feedback">&#x1F4AC;<span class="float-label">Feedback</span></button>
-  <button class="float-btn like" id="like-btn" onclick="doLike()" title="Like this app">
-    <span class="heart" id="like-heart">&#x1F90D;</span><span class="like-count" id="like-count">0</span>
-  </button>
-</div>
-
 <div id="hdr">
   <div class="left">
     <h1>Central Parkway</h1>
@@ -973,6 +958,16 @@ tr.r.taken-row:hover { opacity: 0.65; }
     <a href="https://miwaydrift.github.io/hastus/" target="_blank" class="hdr-btn" style="text-decoration:none;display:flex;align-items:center;gap:5px;background:#b45309;border-color:#b45309;color:#fff">&#x1F4BB; Hastus Scraper</a>
     <button class="hastus-btn" id="hastus-btn" onclick="openHastus()">
       &#x1F4E5; Import HASTUS
+    </button>
+    <button class="like-btn" id="like-btn" onclick="doLike()" title="Like this app">
+      <span class="heart" id="like-heart">&#x1F90D;</span>
+      <span class="like-count" id="like-count">0</span>
+    </button>
+    <button class="fb-btn" id="fb-btn" onclick="openFeedback()" title="Send feedback">
+      &#x1F4AC; Feedback
+    </button>
+    <button class="fb-btn" id="fbadmin-btn" onclick="openFeedbackAdmin()" title="View feedback" style="display:none">
+      &#x1F4EC; Inbox
     </button>
     <div class="user-pill" id="user-pill" onclick="signOut()" style="display:none" title="Sign out">
       <div class="user-avatar-placeholder" id="user-avatar-placeholder">?</div>
@@ -1212,14 +1207,6 @@ try {
   fbDb   = firebase.firestore();
   firebase.analytics();
   FIREBASE_READY = true;
-  // Catch errors from the redirect-based sign-in when the page reloads
-  fbAuth.getRedirectResult().catch(function(err){
-    var errEl = document.getElementById('auth-error');
-    var loadEl = document.getElementById('auth-loading');
-    if (loadEl) loadEl.style.display = 'none';
-    if (errEl) { errEl.style.display = 'block'; errEl.textContent = err.message; }
-    console.error('redirect sign-in error', err);
-  });
 } catch(e) {
   console.warn('Firebase init failed:', e);
 }
@@ -1304,9 +1291,7 @@ function signInWithGoogle() {
   var errEl  = document.getElementById('auth-error');
   loadEl.style.display = 'block';
   errEl.style.display  = 'none';
-  // Redirect-based sign-in is more reliable than popup on hosted domains
-  // (e.g. GitHub Pages), where cross-origin popups are increasingly blocked.
-  fbAuth.signInWithRedirect(provider).catch(function(err) {
+  fbAuth.signInWithPopup(provider).catch(function(err) {
     loadEl.style.display = 'none';
     errEl.style.display  = 'block';
     errEl.textContent    = err.message;
