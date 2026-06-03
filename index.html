@@ -849,90 +849,6 @@ tr.r.taken-row:hover { opacity: 0.65; }
   display: flex; align-items: center; gap: 8px;
 }
 .hastus-cloud-row.saved { background: var(--green-bg); border-color: var(--green); color: var(--green); }
-
-/* ───── FLOATING DOCK (Like + Feedback) ───── */
-#float-dock {
-  position: fixed; right: 16px; bottom: 16px;
-  z-index: 150;
-  display: flex; flex-direction: column; gap: 10px;
-  align-items: flex-end;
-}
-.float-btn {
-  display: flex; align-items: center; gap: 7px;
-  border: none; cursor: pointer;
-  font-family: var(--font); font-weight: 700; font-size: 14px;
-  border-radius: 28px; padding: 12px 16px;
-  box-shadow: var(--shadow-lg);
-  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
-  -webkit-tap-highlight-color: transparent;
-}
-.float-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,0,0,0.2); }
-.float-btn:active { transform: scale(0.96); }
-.float-btn .float-label { white-space: nowrap; }
-
-.float-btn.fb { background: var(--surface); color: var(--text); border: 1.5px solid var(--border2); }
-.float-btn.fb:hover { background: var(--surface2); }
-
-.float-btn.like { background: #fff; color: var(--text); border: 1.5px solid var(--border2); }
-.float-btn.like.liked { background: #be123c; color: #fff; border-color: #be123c; }
-.float-btn.like .heart { font-size: 17px; line-height: 1; transition: transform 0.2s; }
-.float-btn.like.pop .heart { transform: scale(1.6); }
-.float-btn.like .like-count { font-variant-numeric: tabular-nums; min-width: 12px; font-weight: 700; }
-
-/* On small screens, collapse feedback labels to keep it tidy */
-@media (max-width: 480px) {
-  #float-dock { right: 12px; bottom: 12px; gap: 8px; }
-  .float-btn { padding: 11px 14px; font-size: 13px; }
-}
-
-#fb-overlay, #fbadmin-overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.5); z-index: 300;
-  align-items: center; justify-content: center;
-  padding: 16px; backdrop-filter: blur(2px);
-}
-#fb-overlay.show, #fbadmin-overlay.show { display: flex; }
-.fb-modal {
-  background: var(--surface); border-radius: 16px;
-  width: 100%; max-width: 460px; max-height: 88vh;
-  overflow-y: auto; box-shadow: var(--shadow-lg);
-}
-.fb-head { padding: 18px 20px 8px; }
-.fb-head h2 { font-size: 18px; font-weight: 700; }
-.fb-head p { font-size: 13px; color: var(--text2); margin-top: 4px; }
-.fb-body { padding: 8px 20px 16px; }
-.fb-body textarea {
-  width: 100%; min-height: 110px; resize: vertical;
-  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
-  padding: 10px 12px; font-size: 14px; font-family: var(--font);
-  background: var(--surface2); color: var(--text); outline: none;
-}
-.fb-body textarea:focus { border-color: var(--accent); }
-.fb-body input.fb-name {
-  width: 100%; margin-bottom: 8px;
-  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
-  padding: 9px 12px; font-size: 13px; font-family: var(--font);
-  background: var(--surface2); color: var(--text); outline: none;
-}
-.fb-body input.fb-name:focus { border-color: var(--accent); }
-.fb-foot { display: flex; gap: 10px; padding: 0 20px 18px; }
-.fb-foot button {
-  flex: 1; padding: 11px; border-radius: var(--radius-sm);
-  font-size: 14px; font-weight: 600; font-family: var(--font);
-  cursor: pointer; border: 1.5px solid var(--border);
-}
-.fb-foot .cancel { background: var(--surface2); color: var(--text2); }
-.fb-foot .send { background: var(--accent); color: #fff; border-color: var(--accent); }
-.fb-result { font-size: 13px; padding: 0 20px 12px; }
-.fb-result.ok { color: var(--green); }
-.fb-result.err { color: var(--red); }
-.fb-item {
-  border: 1px solid var(--border); border-radius: var(--radius-sm);
-  padding: 12px 14px; margin-bottom: 10px; background: var(--surface2);
-}
-.fb-item .fb-msg { font-size: 14px; color: var(--text); white-space: pre-wrap; }
-.fb-item .fb-meta { font-size: 11px; color: var(--text3); margin-top: 8px; }
-.fb-empty { text-align: center; color: var(--text3); padding: 30px 0; font-size: 14px; }
 </style>
 </head>
 <body>
@@ -952,14 +868,6 @@ tr.r.taken-row:hover { opacity: 0.65; }
     <div class="auth-loading" id="auth-loading">Signing in…</div>
     <div class="auth-error" id="auth-error"></div>
   </div>
-</div>
-
-<div id="float-dock">
-  <button class="float-btn fb" id="fbadmin-btn" onclick="openFeedbackAdmin()" title="View feedback" style="display:none">&#x1F4EC;<span class="float-label">Inbox</span></button>
-  <button class="float-btn fb" id="fb-btn" onclick="openFeedback()" title="Send feedback">&#x1F4AC;<span class="float-label">Feedback</span></button>
-  <button class="float-btn like" id="like-btn" onclick="doLike()" title="Like this app">
-    <span class="heart" id="like-heart">&#x1F90D;</span><span class="like-count" id="like-count">0</span>
-  </button>
 </div>
 
 <div id="hdr">
@@ -1132,39 +1040,6 @@ tr.r.taken-row:hover { opacity: 0.65; }
     <div class="stats-grid" id="sg"></div>
     <div class="week-label">Weekly Schedule</div>
     <div class="week-grid" id="wg"></div>
-  </div>
-</div>
-
-<!-- Feedback submit modal -->
-<div id="fb-overlay" onclick="if(event.target===this)closeFeedback()">
-  <div class="fb-modal">
-    <div class="fb-head">
-      <h2>&#x1F4AC; Send Feedback</h2>
-      <p>Found a bug or have a suggestion? Let me know.</p>
-    </div>
-    <div class="fb-body">
-      <input type="text" class="fb-name" id="fb-name" placeholder="Your name (optional)">
-      <textarea id="fb-text" placeholder="Type your feedback here..."></textarea>
-    </div>
-    <div class="fb-result" id="fb-result"></div>
-    <div class="fb-foot">
-      <button class="cancel" onclick="closeFeedback()">Cancel</button>
-      <button class="send" id="fb-send" onclick="sendFeedback()">Send</button>
-    </div>
-  </div>
-</div>
-
-<!-- Feedback admin (owner only) modal -->
-<div id="fbadmin-overlay" onclick="if(event.target===this)closeFeedbackAdmin()">
-  <div class="fb-modal">
-    <div class="fb-head">
-      <h2>&#x1F4EC; Feedback Inbox</h2>
-      <p id="fbadmin-sub">Loading...</p>
-    </div>
-    <div class="fb-body" id="fbadmin-list"></div>
-    <div class="fb-foot">
-      <button class="cancel" onclick="closeFeedbackAdmin()">Close</button>
-    </div>
   </div>
 </div>
 
@@ -1360,9 +1235,6 @@ if (FIREBASE_READY) {
       if (cr) cr.style.display = 'flex';
       // Load data
       loadUserData(user.uid);
-      // Owner-only feedback inbox button
-      var fbadmin = document.getElementById('fbadmin-btn');
-      if (fbadmin) fbadmin.style.display = (user.email && user.email.toLowerCase() === OWNER_EMAIL) ? 'flex' : 'none';
     } else {
       // Show auth overlay
       overlay.style.display = 'flex';
@@ -1370,8 +1242,6 @@ if (FIREBASE_READY) {
       pill.style.display = 'none';
       var cr = document.getElementById('hastus-cloud-row');
       if (cr) cr.style.display = 'none';
-      var fbadmin = document.getElementById('fbadmin-btn');
-      if (fbadmin) fbadmin.style.display = 'none';
       // Reset to empty state
       FAVS = {}; RANKS = [];
       render(); updFavCnt();
@@ -1383,123 +1253,6 @@ if (FIREBASE_READY) {
   overlay.style.display = 'none';
 }
 // ──────────────────────────────────────────────
-
-// ═══════════ LIKES & FEEDBACK ═══════════
-var OWNER_EMAIL = 'gurjinder9269@gmail.com';
-var LIKE_DOC = null; // firestore ref, set when ready
-
-function initLikeDoc(){
-  if (FIREBASE_READY && !LIKE_DOC) LIKE_DOC = fbDb.collection('meta').doc('likes');
-}
-
-// Live like count — everyone sees the same number
-function watchLikes(){
-  initLikeDoc();
-  if (!LIKE_DOC) return;
-  LIKE_DOC.onSnapshot(function(doc){
-    var n = (doc.exists && doc.data().count) ? doc.data().count : 0;
-    var el = document.getElementById('like-count');
-    if (el) el.textContent = n;
-  }, function(e){ console.warn('like watch err', e); });
-  // Reflect this device's liked state
-  if (localStorage.getItem('cp_liked') === '1') {
-    document.getElementById('like-btn').classList.add('liked');
-  }
-}
-
-function doLike(){
-  initLikeDoc();
-  if (!LIKE_DOC) { alert('Not connected yet, try again in a moment.'); return; }
-  if (localStorage.getItem('cp_liked') === '1') return; // once per device
-  var btn = document.getElementById('like-btn');
-  btn.classList.add('liked');
-  btn.classList.add('pop');
-  setTimeout(function(){ btn.classList.remove('pop'); }, 200);
-  try { localStorage.setItem('cp_liked','1'); } catch(e){}
-  LIKE_DOC.set({
-    count: firebase.firestore.FieldValue.increment(1)
-  }, { merge: true }).catch(function(e){
-    console.error('like err', e);
-    btn.classList.remove('liked');
-    try { localStorage.removeItem('cp_liked'); } catch(e2){}
-  });
-}
-
-// ─── Feedback submit ───
-function openFeedback(){
-  document.getElementById('fb-text').value = '';
-  document.getElementById('fb-result').textContent = '';
-  document.getElementById('fb-result').className = 'fb-result';
-  // Prefill name if signed in
-  var nm = document.getElementById('fb-name');
-  if (CURRENT_USER && CURRENT_USER !== 'guest' && CURRENT_USER.displayName && !nm.value) {
-    nm.value = CURRENT_USER.displayName;
-  }
-  document.getElementById('fb-overlay').classList.add('show');
-}
-function closeFeedback(){ document.getElementById('fb-overlay').classList.remove('show'); }
-
-function sendFeedback(){
-  var msg = document.getElementById('fb-text').value.trim();
-  var name = document.getElementById('fb-name').value.trim();
-  var res = document.getElementById('fb-result');
-  if (!msg) { res.className='fb-result err'; res.textContent='Please type some feedback first.'; return; }
-  if (!FIREBASE_READY) { res.className='fb-result err'; res.textContent='Not connected. Try again later.'; return; }
-  var btn = document.getElementById('fb-send');
-  btn.disabled = true; btn.textContent = 'Sending...';
-  fbDb.collection('feedback').add({
-    message: msg,
-    name: name || 'Anonymous',
-    email: (CURRENT_USER && CURRENT_USER !== 'guest' && CURRENT_USER.email) ? CURRENT_USER.email : '',
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  }).then(function(){
-    res.className='fb-result ok'; res.textContent='✅ Thanks! Your feedback was sent.';
-    document.getElementById('fb-text').value='';
-    btn.disabled = false; btn.textContent = 'Send';
-    setTimeout(closeFeedback, 1200);
-  }).catch(function(e){
-    console.error('feedback err', e);
-    res.className='fb-result err'; res.textContent='Could not send: '+e.message;
-    btn.disabled = false; btn.textContent = 'Send';
-  });
-}
-
-// ─── Feedback admin (owner only) ───
-function openFeedbackAdmin(){
-  var overlay = document.getElementById('fbadmin-overlay');
-  var list = document.getElementById('fbadmin-list');
-  var sub = document.getElementById('fbadmin-sub');
-  overlay.classList.add('show');
-  list.innerHTML = '';
-  sub.textContent = 'Loading...';
-  if (!FIREBASE_READY) { sub.textContent = 'Not connected.'; return; }
-  fbDb.collection('feedback').orderBy('createdAt','desc').limit(200).get().then(function(snap){
-    if (snap.empty) { sub.textContent = 'No feedback yet.'; list.innerHTML = '<div class="fb-empty">📭 Nothing here yet.</div>'; return; }
-    sub.textContent = snap.size + ' message' + (snap.size===1?'':'s');
-    var h = '';
-    snap.forEach(function(doc){
-      var d = doc.data();
-      var when = '';
-      if (d.createdAt && d.createdAt.toDate) {
-        try { when = d.createdAt.toDate().toLocaleString(); } catch(e){}
-      }
-      var who = (d.name || 'Anonymous');
-      if (d.email) who += ' · ' + d.email;
-      h += '<div class="fb-item"><div class="fb-msg">'+escapeHtml(d.message||'')+'</div>'
-         + '<div class="fb-meta">'+escapeHtml(who)+(when?(' · '+when):'')+'</div></div>';
-    });
-    list.innerHTML = h;
-  }).catch(function(e){
-    console.error('admin load err', e);
-    sub.textContent = 'Error loading feedback: ' + e.message;
-  });
-}
-function closeFeedbackAdmin(){ document.getElementById('fbadmin-overlay').classList.remove('show'); }
-
-function escapeHtml(s){
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-// ═══════════════════════════════════════════
 
 function normDayObj(v,fallbackType){
   if(!v) return null;
@@ -2415,7 +2168,7 @@ document.getElementById('cavail').addEventListener('change',function(){
   render();
 });
 
-window.onload=function(){ load(); watchLikes(); };
+window.onload=load;
 </script>
 </body>
 </html>
