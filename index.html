@@ -1963,7 +1963,7 @@ function renderAdminMenuItems(isAdmin) {
 // The actual security boundary is the Firestore rule below, which only lets
 // this UID write to other users' documents.
 var ADMIN_UID = '3C9qAklodWTy4uH8CsojoDFqyTF3'; // ← replace with the UID from Firebase Console → Authentication → Users
-
+var GARAGE_ID = 'central'; // used to keep this garage's signup info (name/date/crew count) separate from other garage pages sharing this Firebase project
 function toggleUserMenu(e){
   e.stopPropagation();
   var m=document.getElementById('user-menu');
@@ -2169,7 +2169,7 @@ function setBannerMessage(){
 // ───── ADMIN: signup info (garage name / date / crew count) ─────
 function watchGlobalConfig(){
   if (!FIREBASE_READY) { setTimeout(watchGlobalConfig, 500); return; }
-  _onSnapshot(_doc(fbDb, 'meta', 'config'), function(doc){
+  _onSnapshot(_doc(fbDb, 'meta', 'config_' + GARAGE_ID), function(doc){
     if (!doc.exists()) return;
     var d = doc.data();
     if (d.garageName) {
@@ -2189,7 +2189,7 @@ function editSignupInfo(){
   var suggestedCount = DATA.length || '';
   var crewCount = prompt('Crew count (leave as suggested to match loaded data):', suggestedCount);
   if (crewCount === null) return;
-  _setDoc(_doc(fbDb, 'meta', 'config'), {
+  _setDoc(_doc(fbDb, 'meta', 'config_' + GARAGE_ID), {
     garageName: garageName.trim(),
     signupDate: signupDate.trim(),
     crewCount: crewCount.trim(),
